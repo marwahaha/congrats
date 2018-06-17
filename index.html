@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Congrats!</title>
+</head>
+
+<body>
+<canvas id="myCanvas" width="500" height="200"
+style="border:1px solid #000000;">
+</canvas>
+
+<script src="https://cdn.jsdelivr.net/npm/proton-js@3.1.2/build/proton.min.js"></script>
+<script>
+var canvas;
+var context;
+var proton;
+var renderer;
+var emitter;
+var stats;
+var mouseObj;
+var attractionForce;
+
+var canvas = document.getElementById("myCanvas");
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+var mouseObjs = [];
+for (var i=0; i<10; i++) {
+    mouseObjs.push({
+        x: canvas.width/2,
+        y: canvas.height*(0.5 + (i/9)*3)/4
+    })
+}
+
+var upperObjs = [];
+for (i = 0; i < 4; i++) {
+    upperObjs.push({
+        x: ((i+.5) / 4 * canvas.width),
+        y: canvas.height * 1/11
+    })
+}
+// var mouseObjTop = {
+//     x: canvas.width/2,
+//     y: canvas.height*1/4
+// };
+// // var mouseObjLeft = {
+// //     x: 0,
+// //     y: canvas.height/2
+// // };
+// // var mouseObjRight = {
+// //     x: canvas.width,
+// //     y: canvas.height/2
+// // };
+// var mouseObjBottom = {
+//     x: canvas.width/2,
+//     y: canvas.height*3/4
+// };
+loadImage();
+
+function loadImage() {
+    var image = new Image()
+    image.onload = function (e) {
+        createProton(e.target);
+        tick();
+    }
+    image.src = 'particle.png';
+}
+
+function createProton(image) {
+    proton = new Proton;
+    emitter = new Proton.Emitter();
+    emitter.rate = new Proton.Rate(new Proton.Span(1, 1), .1);
+    emitter.addInitialize(new Proton.Mass(40));
+    emitter.addInitialize(new Proton.Body(image));
+    emitter.addInitialize(new Proton.Life(20, 30));
+    emitter.addInitialize(new Proton.V(new Proton.Span(8, 4), new Proton.Span(-.5, .5), 'polar'));
+    emitter.addBehaviour(new Proton.Color('#f00000', '#ffff00'));
+
+    for (var i=0; i<mouseObjs.length; i++) {
+        if (i == 0 || i == mouseObjs.length -1) {
+            attractionForce = new Proton.Attraction(mouseObjs[i], 1000, 2000);
+        } else {
+            attractionForce = new Proton.Attraction(mouseObjs[i], 10, 10);
+        }
+        emitter.addBehaviour(attractionForce);
+    }
+
+    emitter.addBehaviour(new Proton.Scale(Proton.getSpan(1, 1.6), Proton.getSpan(0, .1)));
+    emitter.addBehaviour(new Proton.Alpha(1, .6));
+    emitter.p.x = canvas.width / 2;
+    emitter.p.y = canvas.height / 2;
+    emitter.emit();
+    proton.addEmitter(emitter);
+
+
+
+
+    emitter = new Proton.Emitter();
+    emitter.rate = new Proton.Rate(new Proton.Span(1, 1), .1);
+    emitter.addInitialize(new Proton.Mass(40));
+    emitter.addInitialize(new Proton.Body(image));
+    emitter.addInitialize(new Proton.Life(20, 30));
+    emitter.addInitialize(new Proton.V(new Proton.Span(1, 1), new Proton.Span(89.5, 90.5), 'polar'));
+    emitter.addBehaviour(new Proton.Color('#f00000', '#ffff00'));
+
+    for (var i=0; i<upperObjs.length; i++) {
+        if (i == 0 || i == upperObjs.length -1) {
+            attractionForce = new Proton.Attraction(upperObjs[i], 1000, 2000);
+        } else {
+            attractionForce = new Proton.Attraction(upperObjs[i], 10, 10);
+        }
+        emitter.addBehaviour(attractionForce);
+    }
+
+    emitter.addBehaviour(new Proton.Scale(Proton.getSpan(1, 1.6), Proton.getSpan(0, .1)));
+    emitter.addBehaviour(new Proton.Alpha(1, .6));
+    emitter.p.x = canvas.width / 2;
+    emitter.p.y = canvas.height * 1/11;
+    emitter.emit();
+    proton.addEmitter(emitter);
+
+
+
+
+    renderer = new Proton.WebGLRenderer(canvas);
+    renderer.blendFunc("SRC_ALPHA", "ONE");
+    proton.addRenderer(renderer);
+}
+
+
+function tick() {
+    requestAnimationFrame(tick);
+    if (proton) {
+        proton.update();
+    }
+}
+</script>
+</body>
+
+</html>
