@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Congrats!</title>
+</head>
+
+<body>
+<canvas id="myCanvas" width="500" height="200" style="border:1px solid #000000;background-color:#000000;"></canvas>
+<script src="https://cdn.jsdelivr.net/npm/proton-js@3.1.2/build/proton.min.js"></script>
+<script>
+var canvas = document.getElementById("myCanvas");
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+var proton = createProton(canvas.width * 7/8, canvas.height*3/4, '#32CD32', '#0000ff');
+tick();
+
+function createProton(x, y, color1, color2) {
+    proton = new Proton;
+    var emitter = new Proton.Emitter();
+    emitter.rate = new Proton.Rate(new Proton.Span(1, 3), 1);
+    emitter.addInitialize(new Proton.Mass(40));
+    emitter.addInitialize(new Proton.Life(20, 30));
+    emitter.addInitialize(new Proton.V(new Proton.Span(1, 2), new Proton.Span(-40, 40), 'polar'));
+    emitter.addBehaviour(new Proton.Color(color1, color2));
+
+    var attractionForce = new Proton.Attraction({x: canvas.width/2, y: canvas.height/2}, 1000, 2000);
+    emitter.addBehaviour(attractionForce);
+
+    emitter.addBehaviour(new Proton.Scale(Proton.getSpan(1, 1.6), Proton.getSpan(0, .1)));
+    emitter.addBehaviour(new Proton.Alpha(1, .8));
+    emitter.p.x = x
+    emitter.p.y = y
+    emitter.emit();
+    proton.addEmitter(emitter);
+
+    var renderer = new Proton.WebGLRenderer(canvas);
+    renderer.blendFunc("SRC_ALPHA", "ONE");
+    proton.addRenderer(renderer);
+    return proton;
+}
+
+function tick() {
+    requestAnimationFrame(tick);
+    if (proton) {
+        proton.update();
+    }
+}
+</script>
+</body>
+
+</html>
